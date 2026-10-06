@@ -66,7 +66,7 @@ select option{background:var(--surface2)}
 .step-num{background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px}
 
 /* ページ選択 */
-.page-select-wrap{display:none}
+.page-select-wrap{}
 .page-select-title{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:10px;letter-spacing:.04em}
 .page-limit{font-size:11px;color:var(--gold);margin-bottom:12px}
 .page-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
@@ -235,7 +235,7 @@ select option{background:var(--surface2)}
     </div>
 
     <!-- スタンダード・プレミアム：ページ選択 -->
-    <div id="sec-page-select" class="card page-select-wrap hidden">
+    <div id="sec-page-select" class="card page-select-wrap hidden" style="display:none">
       <div class="card-title"><span>📑</span>作成するページを選択</div>
       <div class="page-limit" id="page-limit-text"></div>
       <div class="page-chips" id="pageChips"></div>
@@ -447,19 +447,27 @@ function selectPlan(plan){
   if(cards[planIdx]) cards[planIdx].classList.add('active');
   // display操作はclassで統一（iOS対応）
   ['sec-basic','sec-concept','sec-drive'].forEach(function(id){
-    document.getElementById(id).classList.remove('hidden');
+    var el=document.getElementById(id);
+    el.classList.remove('hidden');
+    el.style.display='block';
   });
   if(plan==='light'){
     document.getElementById('sec-light').classList.remove('hidden');
+    document.getElementById('sec-light').style.display='block';
     document.getElementById('sec-page-select').classList.add('hidden');
+    document.getElementById('sec-page-select').style.display='none';
   } else {
     document.getElementById('sec-light').classList.add('hidden');
+    document.getElementById('sec-light').style.display='none';
     document.getElementById('sec-page-select').classList.remove('hidden');
+    document.getElementById('sec-page-select').style.display='block';
   }
   if(plan==='premium'){
     document.getElementById('sec-premium-extra').classList.remove('hidden');
+    document.getElementById('sec-premium-extra').style.display='block';
   } else {
     document.getElementById('sec-premium-extra').classList.add('hidden');
+    document.getElementById('sec-premium-extra').style.display='none';
   }
   document.getElementById('pageForms').innerHTML='';
 
@@ -483,30 +491,57 @@ function buildPageChips(plan){
   var pages=plan==='premium'?PAGES_PREMIUM:PAGES_STANDARD;
   var limit=planLimits[plan];
   document.getElementById('page-limit-text').textContent='最大'+limit+'ページまで選択できます。TOPページは必須です。';
-  var el=document.getElementById('pageChips');
-  el.innerHTML='';
-  pages.forEach(function(p){
-    var div=document.createElement('div');
-    div.className='page-chip'+(p==='TOP（メイン）'?' on':'');
-    div.innerHTML='<span class="check">✓</span>'+p;
-    // iOS対応：touchendとclickの両方に対応
-    var tapped=false;
-    div.addEventListener('touchstart',function(){tapped=true;},{passive:true});
-    div.addEventListener('touchend',function(e){
-      e.preventDefault();
-      togglePage(div,p,limit);
-    },{passive:false});
-    div.addEventListener('click',function(){
-      if(!tapped) togglePage(div,p,limit);
-      tapped=false;
+  var container=document.getElementById('pageChips');
+  container.innerHTML='';
+
+  pages.forEach(function(p,idx){
+    var isTop = p==='TOP（メイン）';
+    var cbId = 'page-cb-'+idx;
+
+    // labelでwrapしたcheckbox方式（iOS/Android/PC全対応）
+    var lbl=document.createElement('label');
+    lbl.className='page-chip'+(isTop?' on':'');
+    lbl.htmlFor=cbId;
+
+    var cb=document.createElement('input');
+    cb.type='checkbox';
+    cb.id=cbId;
+    cb.checked=isTop;
+    cb.disabled=isTop; // TOPは外せない
+    cb.style.cssText='position:absolute;opacity:0;width:0;height:0;';
+
+    cb.addEventListener('change',function(){
+      if(isTop) return;
+      if(cb.checked){
+        if(selectedPages.length>=limit){
+          alert('最大'+limit+'ページまで選択できます。');
+          cb.checked=false;
+          return;
+        }
+        selectedPages.push(p);
+        lbl.classList.add('on');
+      } else {
+        var i=selectedPages.indexOf(p);
+        if(i>-1) selectedPages.splice(i,1);
+        lbl.classList.remove('on');
+      }
+      document.getElementById('pageCount').textContent=selectedPages.length;
+      buildPageForms();
     });
-    el.appendChild(div);
+
+    var mark=document.createElement('span');
+    mark.className='check';
+    mark.textContent='✓';
+
+    lbl.appendChild(cb);
+    lbl.appendChild(mark);
+    lbl.appendChild(document.createTextNode(p));
+    container.appendChild(lbl);
   });
-  if(currentPlan!=='light'){
-    selectedPages=['TOP（メイン）'];
-    document.getElementById('pageCount').textContent=1;
-    buildPageForms();
-  }
+
+  selectedPages=['TOP（メイン）'];
+  document.getElementById('pageCount').textContent=1;
+  buildPageForms();
 }
 
 function togglePage(el,page,limit){
