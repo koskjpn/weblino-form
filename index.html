@@ -90,7 +90,7 @@ select option{background:var(--surface2)}
 .btn-submit:disabled{opacity:.45;cursor:default}
 
 /* 成功 */
-.success{text-align:center;padding:48px 20px;display:none}
+.success{text-align:center;padding:48px 20px;}
 .success-icon{font-size:64px;margin-bottom:16px}
 .success h2{font-size:20px;font-weight:700;margin-bottom:8px}
 .success p{font-size:13px;color:var(--muted);line-height:1.8}
@@ -151,7 +151,7 @@ select option{background:var(--surface2)}
     </div>
 
     <!-- 共通：基本情報 -->
-    <div class="card" id="sec-basic" class="hidden">
+    <div class="card hidden" id="sec-basic" style="display:none">
       <div class="card-title"><span>🏪</span>基本情報</div>
       <div class="field"><label>店舗名・屋号<span class="req">*</span></label><input type="text" id="shopName" placeholder="例：カフェ ブルーム"></div>
       <div class="field"><label>業種<span class="req">*</span></label>
@@ -174,7 +174,7 @@ select option{background:var(--surface2)}
     </div>
 
     <!-- 共通：コンセプト -->
-    <div class="card" id="sec-concept" class="hidden">
+    <div class="card hidden" id="sec-concept" style="display:none">
       <div class="card-title"><span>✨</span>デザイン・コンセプト</div>
       <div class="field"><label>キャッチコピー</label><input type="text" id="catchcopy" placeholder="例：素材を活かす、一番のこだわり。"></div>
       <div class="field">
@@ -198,7 +198,7 @@ select option{background:var(--surface2)}
     </div>
 
     <!-- 共通：Googleドライブ -->
-    <div class="card" id="sec-drive" class="hidden">
+    <div class="card hidden" id="sec-drive" style="display:none">
       <div class="card-title"><span>📁</span>写真・素材（Googleドライブ）</div>
       <div class="steps">
         <div class="steps-title">📌 素材の送り方</div>
@@ -223,7 +223,7 @@ select option{background:var(--surface2)}
     </div>
 
     <!-- ライト専用 -->
-    <div id="sec-light" class="hidden">
+    <div id="sec-light" class="hidden" style="display:none">
       <div class="card">
         <div class="card-title"><span>📄</span>メインページ（1ページ）の内容</div>
         <div style="font-size:11px;color:var(--muted);background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:14px;line-height:1.6">
@@ -246,7 +246,7 @@ select option{background:var(--surface2)}
     <div class="page-forms" id="pageForms"></div>
 
     <!-- プレミアム追加 -->
-    <div id="sec-premium-extra" class="hidden">
+    <div id="sec-premium-extra" class="hidden" style="display:none">
       <div class="card">
         <div class="card-title"><span>🤖</span>チャットボット設定</div>
         <div class="field"><label>チャットボットで答えさせたいQ&A（3〜5件）</label>
@@ -265,7 +265,7 @@ select option{background:var(--surface2)}
 
   </div><!-- /formArea -->
 
-  <div class="success" id="successArea">
+  <div class="success" id="successArea" style="display:none">
     <div class="success-icon">✅</div>
     <h2>送信完了しました！</h2>
     <p>素材フォームのご提出ありがとうございます。<br>担当者が内容を確認し、3営業日以内にご連絡いたします。</p>
@@ -439,6 +439,7 @@ function getChips(el){
 }
 
 function selectPlan(plan){
+  console.log('selectPlan called:', plan);
   currentPlan=plan;
   selectedPages=[];
   document.querySelectorAll('.plan-card').forEach(function(c){c.classList.remove('active');});
@@ -449,7 +450,9 @@ function selectPlan(plan){
   ['sec-basic','sec-concept','sec-drive'].forEach(function(id){
     var el=document.getElementById(id);
     el.classList.remove('hidden');
+    el.style.removeProperty('display');
     el.style.display='block';
+    console.log(id, 'display:', el.style.display, 'offsetHeight:', el.offsetHeight);
   });
   if(plan==='light'){
     document.getElementById('sec-light').classList.remove('hidden');
@@ -617,6 +620,12 @@ function validate(){
 }
 
 function submitForm(){
+  // プラン未選択の場合は即ストップ
+  if(!currentPlan){
+    alert('プランを選択してください');
+    window.scrollTo(0,0);
+    return;
+  }
   var errs=validate();
   if(errs.length){alert('⚠ 入力内容を確認してください\n\n'+errs.join('\n'));return;}
   var planNames={light:'ライトプラン (¥8,000/月)',standard:'スタンダードプラン (¥15,000/月)',premium:'プレミアムプラン (¥30,000/月)'};
@@ -656,17 +665,28 @@ function submitForm(){
   document.getElementById('btnSubmit').disabled=true;
   document.getElementById('btnSubmit').textContent='送信中...';
   if(webhookUrl){
+    // no-corsはレスポンスが取れないので1.5秒後に強制完了
     fetch(webhookUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),mode:'no-cors'})
-    .then(function(){showSuccess();}).catch(function(){showSuccess();});
+    .catch(function(){});
+    setTimeout(function(){ showSuccess(); }, 1500);
   } else {
-    console.log('送信データ:',data); showSuccess();
+    showSuccess();
   }
 }
 
 function showSuccess(){
-  document.getElementById('formArea').style.display='none';
-  document.getElementById('successArea').style.display='block';
-  window.scrollTo({top:0,behavior:'smooth'});
+  console.log('showSuccess called');
+  // wrap内の全要素を削除してsuccessAreaだけ残す
+  var wrap = document.querySelector('.wrap');
+  wrap.innerHTML = '';
+  // 成功メッセージを作成
+  var html = '<div style="text-align:center;padding:60px 20px">';
+  html += '<div style="font-size:64px;margin-bottom:20px">✅</div>';
+  html += '<h2 style="font-size:22px;font-weight:700;margin-bottom:12px;color:#f0f0f5">送信完了しました！</h2>';
+  html += '<p style="font-size:13px;color:#8888a8;line-height:1.8">素材フォームのご提出ありがとうございます。<br>担当者が内容を確認し、3営業日以内にご連絡いたします。</p>';
+  html += '</div>';
+  wrap.innerHTML = html;
+  window.scrollTo(0,0);
 }
 
 // 全タッチイベントを一括管理（iOS対応）
