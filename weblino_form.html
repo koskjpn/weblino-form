@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WEBLINO | HP制作 素材フォーム</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--surface:#13131a;--surface2:#1a1a26;--border:#2a2a3a;
+  --accent:#7c3aed;--gold:#c4943a;--text:#f0f0f5;--muted:#8888a8;
+  --green:#22c55e;
+}
+body{background:var(--bg);color:var(--text);font-family:'Hiragino Sans','Meiryo',sans-serif;min-height:100vh}
+.wrap{max-width:620px;margin:0 auto;padding:24px 16px 80px}
+
+.header{background:linear-gradient(135deg,#3b0764,#1e0a3a);border:1px solid var(--accent);border-radius:20px;padding:28px 24px;margin-bottom:24px;text-align:center}
+.header-logo{font-size:11px;letter-spacing:.2em;color:var(--gold);font-weight:700;margin-bottom:8px}
+.header h1{font-size:22px;font-weight:800;margin-bottom:6px}
+.header p{font-size:12px;color:rgba(255,255,255,.65);line-height:1.7}
+
+/* 管理 */
+.admin-toggle{text-align:center;margin-bottom:20px}
+.admin-toggle button{background:none;border:1px solid var(--border);color:var(--muted);font-size:11px;padding:6px 16px;border-radius:20px;cursor:pointer}
+.admin-panel{background:var(--surface);border:1px solid var(--gold);border-radius:16px;padding:20px;margin-bottom:20px;display:none}
+.admin-panel h3{font-size:13px;color:var(--gold);font-weight:700;margin-bottom:14px}
+.admin-row{display:flex;gap:10px;margin-bottom:10px}
+.admin-row input{flex:1;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;color:var(--text);background:var(--surface2);outline:none;font-family:inherit}
+.admin-row button{padding:11px 16px;background:var(--accent);color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:12px;white-space:nowrap;font-family:inherit}
+
+/* プラン選択 */
+.plan-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px}
+.plan-card{background:var(--surface);border:2px solid var(--border);border-radius:14px;padding:14px 10px;cursor:pointer;transition:all .2s;text-align:center;display:block;position:relative;}
+.plan-card:hover{border-color:var(--accent)}
+.plan-card.active{border-color:var(--accent);background:rgba(124,58,237,.1)}
+.plan-card .plan-name{font-size:13px;font-weight:700;margin-bottom:4px}
+.plan-card .plan-price{font-size:11px;color:var(--gold);font-weight:600}
+.plan-card .plan-badge{font-size:9px;background:var(--accent);color:#fff;padding:2px 7px;border-radius:10px;display:inline-block;margin-bottom:6px}
+
+/* カード */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:14px}
+.card-title{font-size:13px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.card-title span{font-size:16px}
+.field{margin-bottom:14px}
+label{font-size:11px;color:var(--muted);display:block;margin-bottom:5px;font-weight:600;letter-spacing:.04em}
+.req{color:var(--accent);margin-left:3px}
+input,select,textarea{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;color:var(--text);background:var(--surface2);outline:none;font-family:inherit;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:90px;line-height:1.6}
+input::placeholder,textarea::placeholder{color:var(--muted);font-size:12px}
+select option{background:var(--surface2)}
+
+/* チップ */
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
+.chip{padding:6px 13px;border-radius:20px;font-size:12px;cursor:pointer;border:1.5px solid var(--border);background:var(--surface2);color:var(--muted);transition:all .15s;user-select:none;display:inline-flex;align-items:center;position:relative;}
+.chip:hover{border-color:var(--accent);color:var(--text)}
+.chip.on{background:rgba(124,58,237,.2);border-color:var(--accent);color:var(--text)}
+
+/* ドライブ */
+.drive-box{background:var(--surface2);border:2px dashed var(--border);border-radius:12px;padding:18px;text-align:center}
+.drive-icon{font-size:32px;margin-bottom:8px}
+.drive-label{font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6}
+.steps{background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:12px;padding:14px;margin-bottom:14px}
+.steps-title{font-size:11px;color:var(--gold);font-weight:700;margin-bottom:10px}
+.step-item{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;font-size:12px;color:rgba(255,255,255,.75);line-height:1.6}
+.step-num{background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px}
+
+/* ページ選択 */
+.page-select-wrap{display:none}
+.page-select-title{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:10px;letter-spacing:.04em}
+.page-limit{font-size:11px;color:var(--gold);margin-bottom:12px}
+.page-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+.page-chip{padding:8px 14px;border-radius:10px;font-size:12px;cursor:pointer;border:1.5px solid var(--border);background:var(--surface2);color:var(--muted);transition:all .2s;user-select:none;position:relative;-webkit-tap-highlight-color:rgba(124,58,237,.2);touch-action:manipulation}
+.page-chip:hover{border-color:var(--accent);color:var(--text)}
+.page-chip.on{background:rgba(124,58,237,.2);border-color:var(--accent);color:var(--text)}
+.page-chip .check{display:none;position:absolute;top:-6px;right:-6px;background:var(--accent);color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;align-items:center;justify-content:center;font-weight:700}
+.page-chip.on .check{display:flex}
+.page-count{font-size:11px;color:var(--muted);margin-top:8px}
+.page-count span{color:var(--accent);font-weight:700}
+
+/* ページ別フォーム */
+.page-forms{margin-top:16px}
+.page-form-card{background:var(--surface2);border:1px solid var(--accent);border-radius:14px;padding:18px;margin-bottom:14px;}
+.page-form-title{font-size:13px;font-weight:700;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.page-form-note{font-size:11px;color:var(--muted);background:var(--bg);border-radius:8px;padding:8px 12px;margin-bottom:12px;line-height:1.6}
+
+/* 送信 */
+.btn-submit{width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,var(--accent),#4f46e5);color:#fff;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:opacity .15s;margin-top:8px}
+.btn-submit:hover{opacity:.88}
+.btn-submit:disabled{opacity:.45;cursor:default}
+
+/* 成功 */
+.success{text-align:center;padding:48px 20px;display:none}
+.success-icon{font-size:64px;margin-bottom:16px}
+.success h2{font-size:20px;font-weight:700;margin-bottom:8px}
+.success p{font-size:13px;color:var(--muted);line-height:1.8}
+
+.hidden{display:none!important}
+@media(max-width:480px){
+  .plan-cards{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="admin-toggle">
+    <button onclick="toggleAdmin()">⚙ 管理者設定</button>
+  </div>
+  <div class="admin-panel" id="adminPanel">
+    <h3>🔧 送信設定</h3>
+    <div class="admin-row">
+      <input type="url" id="cfg-webhook" placeholder="https://script.google.com/macros/s/...">
+      <button onclick="saveCfg()">保存</button>
+    </div>
+  </div>
+
+  <div class="header">
+    <div class="header-logo">W E B L I N O</div>
+    <h1>HP制作 素材フォーム</h1>
+    <p>ホームページ制作に必要な情報・素材をご提供ください。<br>写真・動画はGoogleドライブ共有URLで送っていただきます。</p>
+    <div style="margin-top:12px;background:rgba(255,255,255,.1);border-radius:10px;padding:10px 16px;font-size:12px;">
+      📧 お問い合わせ：<a href="mailto:weblino.jpn@gmail.com" style="color:#c4943a;font-weight:700;text-decoration:none;">weblino.jpn@gmail.com</a>
+    </div>
+  </div>
+
+  <div id="formArea">
+
+    <!-- プラン選択 -->
+    <div class="card">
+      <div class="card-title"><span>📦</span>ご契約プランを選択<span class="req">*</span></div>
+      <div class="plan-cards">
+        <label class="plan-card" for="plan-light" onclick="selectPlan('light')">
+          <input type="radio" id="plan-light" name="plan-select" value="light" style="position:absolute;opacity:0;width:0;height:0">
+          <div class="plan-name">ライトプラン</div>
+          <div class="plan-price">¥8,000/月</div>
+        </label>
+        <label class="plan-card" for="plan-standard" onclick="selectPlan('standard')">
+          <input type="radio" id="plan-standard" name="plan-select" value="standard" style="position:absolute;opacity:0;width:0;height:0">
+          <div class="plan-badge">人気No.1</div>
+          <div class="plan-name">スタンダード</div>
+          <div class="plan-price">¥15,000/月</div>
+        </label>
+        <label class="plan-card" for="plan-premium" onclick="selectPlan('premium')">
+          <input type="radio" id="plan-premium" name="plan-select" value="premium" style="position:absolute;opacity:0;width:0;height:0">
+          <div class="plan-badge">チャットボット付き</div>
+          <div class="plan-name">プレミアム</div>
+          <div class="plan-price">¥30,000/月</div>
+        </label>
+      </div>
+    </div>
+
+    <!-- 共通：基本情報 -->
+    <div class="card" id="sec-basic" class="hidden">
+      <div class="card-title"><span>🏪</span>基本情報</div>
+      <div class="field"><label>店舗名・屋号<span class="req">*</span></label><input type="text" id="shopName" placeholder="例：カフェ ブルーム"></div>
+      <div class="field"><label>業種<span class="req">*</span></label>
+        <select id="industry">
+          <option value="">選択してください</option>
+          <option>カフェ・コーヒーショップ</option><option>飲食店（和食）</option><option>飲食店（洋食・イタリアン）</option><option>飲食店（その他）</option>
+          <option>美容室・ヘアサロン</option><option>エステ・脱毛サロン</option><option>ネイルサロン</option><option>アイサロン</option>
+          <option>整骨院・整体院</option><option>整体・リラクゼーション</option><option>ヨガ・ピラティス</option><option>パーソナルジム</option>
+          <option>不動産・工務店</option><option>コーポレート・企業</option><option>その他</option>
+        </select>
+      </div>
+      <div class="field"><label>担当者名<span class="req">*</span></label><input type="text" id="contactName" placeholder="例：田中 太郎"></div>
+      <div class="field"><label>メールアドレス<span class="req">*</span></label><input type="email" id="contactEmail" placeholder="example@gmail.com"></div>
+      <div class="field"><label>電話番号（担当者）</label><input type="tel" id="contactTel" placeholder="090-0000-0000"></div>
+      <div class="field"><label>HP掲載用電話番号</label><input type="tel" id="publicTel" placeholder="HP上に表示する電話番号"></div>
+      <div class="field"><label>住所・アクセス</label><textarea id="address" rows="3" placeholder="例：福岡県福岡市中央区天神1-1-1&#10;地下鉄天神駅から徒歩3分"></textarea></div>
+      <div class="field"><label>営業時間・定休日</label><input type="text" id="hours" placeholder="例：11:00〜22:00（月曜定休）"></div>
+      <div class="field"><label>SNSアカウント（Instagram等）</label><input type="text" id="sns" placeholder="例：@bluem_cafe"></div>
+      <div class="field"><label>お問い合わせフォームの転送先メール<span class="req">*</span></label><input type="email" id="formEmail" placeholder="お客様からの問い合わせを受け取るメールアドレス"></div>
+    </div>
+
+    <!-- 共通：コンセプト -->
+    <div class="card" id="sec-concept" class="hidden">
+      <div class="card-title"><span>✨</span>デザイン・コンセプト</div>
+      <div class="field"><label>キャッチコピー</label><input type="text" id="catchcopy" placeholder="例：素材を活かす、一番のこだわり。"></div>
+      <div class="field">
+        <label>雰囲気・世界観<span class="req">*</span></label>
+        <div class="chips" id="chips-mood"><label class="chip" for="chips-mood_0"><input type="checkbox" id="chips-mood_0" name="chips-mood" value="高級感・上品" style="position:absolute;opacity:0;width:0;height:0" onclick="this.closest('label').classList.toggle('on',this.checked)">高級感・上品</label><label class="chip" for="chips-mood_1"><input type="checkbox" id="chips-mood_1" name="chips-mood" value="ナチュラル・温かみ" style="position:absolute;opacity:0;width:0;height:0" onclick="this.closest('label').classList.toggle('on',this.checked)">ナチュラル・温かみ</label><label class="chip" for="chips-mood_2"><input type="checkbox" id="chips-mood_2" name="chips-mood" value="スタイリッシュ・モダン" style="position:absolute;opacity:0;width:0;height:0" onclick="this.closest('label').classList.toggle('on',this.checked)">スタイリッシュ・モダン</label><label class="chip" for="chips-mood_3"><input type="checkbox" id="chips-mood_3" name="chips-mood" value="かわいい・ポップ" style="position:absolute;opacity:0;width:0;height:0" onclick="this.closest('label').classList.toggle('on',this.checked)">かわいい・ポップ</label><label class="chip" for="chips-mood_4"><input type="checkbox" id="chips-mood_4" name="chips-mood" value="和風・落ち着き" style="position:absolute;opacity:0;width:0;height:0" onclick="this.closest('label').classList.toggle('on',this.checked)">和風・落ち着き</label><label class="chip" for="chips-mood_5"><input type="checkbox" id="chips-mood_5" name="chips-mood" value="清潔感・信頼感" style="position:absolute;opacity:0;width:0;height:0" onclick="this.closest('label').classList.toggle('on',this.checked)">清潔感・信頼感</label><label class="chip" for="chips-mood_6"><input type="checkbox" id="chips-mood_6" name="chips-mood" value="活気・エネルギッシュ" style="position:absolute;opacity:0;width:0;height:0" onclick="this.closest('label').classList.toggle('on',this.checked)">活気・エネルギッシュ</label><label class="chip" for="chips-mood_7"><input type="checkbox" id="chips-mood_7" name="chips-mood" value="シンプル・ミニマル" style="position:absolute;opacity:0;width:0;height:0" onclick="this.closest('label').classList.toggle('on',this.checked)">シンプル・ミニマル</label></div><div class="chip" data-chip="true">ナチュラル・温かみ</div>
+          <div class="chip" data-chip="true">スタイリッシュ・モダン</div><div class="chip" data-chip="true">かわいい・ポップ</div>
+          <div class="chip" data-chip="true">和風・落ち着き</div><div class="chip" data-chip="true">清潔感・信頼感</div>
+          <div class="chip" data-chip="true">活気・エネルギッシュ</div><div class="chip" data-chip="true">シンプル・ミニマル</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>希望カラーイメージ</label>
+        <div class="chips" id="chips-color"><label class="chip" for="chips-color_0"><input type="checkbox" id="chips-color_0" name="chips-color" value="ブラック・ゴールド" style="position:absolute;opacity:0;width:0;height:0" onclick="this.closest('label').classList.toggle('on',this.checked)">ブラック・ゴールド</label><label class="chip" for="chips-color_1"><input type="checkbox" id="chips-color_1" name="chips-color" value="ホワイト・ベージュ" style="position:absolute;opacity:0;width:0;height:0" onclick="this.closest('label').classList.toggle('on',this.checked)">ホワイト・ベージュ</label><label class="chip" for="chips-color_2"><input type="checkbox" id="chips-color_2" name="chips-color" value="グリーン系" style="position:absolute;opacity:0;width:0;height:0" onclick="this.closest('label').classList.toggle('on',this.checked)">グリーン系</label><label class="chip" for="chips-color_3"><input type="checkbox" id="chips-color_3" name="chips-color" value="ブルー系" style="position:absolute;opacity:0;width:0;height:0" onclick="this.closest('label').classList.toggle('on',this.checked)">ブルー系</label><label class="chip" for="chips-color_4"><input type="checkbox" id="chips-color_4" name="chips-color" value="ピンク・パープル" style="position:absolute;opacity:0;width:0;height:0" onclick="this.closest('label').classList.toggle('on',this.checked)">ピンク・パープル</label><label class="chip" for="chips-color_5"><input type="checkbox" id="chips-color_5" name="chips-color" value="ブラウン・ウッド" style="position:absolute;opacity:0;width:0;height:0" onclick="this.closest('label').classList.toggle('on',this.checked)">ブラウン・ウッド</label><label class="chip" for="chips-color_6"><input type="checkbox" id="chips-color_6" name="chips-color" value="おまかせ" style="position:absolute;opacity:0;width:0;height:0" onclick="this.closest('label').classList.toggle('on',this.checked)">おまかせ</label></div><div class="chip" data-chip="true">ホワイト・ベージュ</div>
+          <div class="chip" data-chip="true">グリーン系</div><div class="chip" data-chip="true">ブルー系</div>
+          <div class="chip" data-chip="true">ピンク・パープル</div><div class="chip" data-chip="true">ブラウン・ウッド</div>
+          <div class="chip" data-chip="true">おまかせ</div>
+        </div>
+      </div>
+      <div class="field"><label>参考にしたいHPのURL（あれば）</label><textarea id="refUrls" rows="2" placeholder="https://..."></textarea></div>
+      <div class="field"><label>強み・他店との違い・アピールしたいこと</label><textarea id="strength" rows="4" placeholder="例：創業20年のこだわりの出汁、完全個室あり、駐車場完備..."></textarea></div>
+    </div>
+
+    <!-- 共通：Googleドライブ -->
+    <div class="card" id="sec-drive" class="hidden">
+      <div class="card-title"><span>📁</span>写真・素材（Googleドライブ）</div>
+      <div class="steps">
+        <div class="steps-title">📌 素材の送り方</div>
+        <div class="step-item"><div class="step-num">1</div><div>担当者からお送りした<strong style="color:var(--gold)">Googleドライブの共有フォルダ</strong>を開く</div></div>
+        <div class="step-item"><div class="step-num">2</div><div>写真・動画・ロゴなどをアップロードする</div></div>
+        <div class="step-item"><div class="step-num">3</div><div>フォルダの<strong style="color:var(--gold)">共有リンクをコピー</strong>して下に貼り付ける</div></div>
+      </div>
+      <div class="drive-box">
+        <div class="drive-icon">🔗</div>
+        <div class="drive-label">GoogleドライブのフォルダURLを貼り付けてください</div>
+        <input type="url" id="driveUrl" placeholder="https://drive.google.com/drive/folders/...">
+      </div>
+      <div id="photo-guide" style="margin-top:12px;font-size:11px;color:var(--muted);line-height:1.8"></div>
+      <div class="field" style="margin-top:14px">
+        <label>ロゴデータはありますか？</label>
+        <select id="hasLogo">
+          <option>あり（ドライブに入れました）</option>
+          <option>なし（作成をお任せします）</option>
+          <option>未定</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- ライト専用 -->
+    <div id="sec-light" class="hidden">
+      <div class="card">
+        <div class="card-title"><span>📄</span>メインページ（1ページ）の内容</div>
+        <div style="font-size:11px;color:var(--muted);background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:14px;line-height:1.6">
+          ライトプランはメインページ（1ページ）のみ作成します。掲載したい内容をご記入ください。
+        </div>
+        <div class="field"><label>メインページに掲載したい内容・構成<span class="req">*</span></label><textarea id="light-main" rows="6" placeholder="例：&#10;・お店の雰囲気写真を大きく見せたい&#10;・メニューと価格を載せたい&#10;・アクセスと地図を入れたい&#10;・営業時間と定休日も必要"></textarea></div>
+        <div class="field"><label>その他ご要望・特記事項</label><textarea id="light-note" rows="3" placeholder="ご自由にどうぞ"></textarea></div>
+      </div>
+    </div>
+
+    <!-- スタンダード・プレミアム：ページ選択 -->
+    <div id="sec-page-select" class="card page-select-wrap hidden">
+      <div class="card-title"><span>📑</span>作成するページを選択</div>
+      <div class="page-limit" id="page-limit-text"></div>
+      <div class="page-chips" id="pageChips"></div>
+      <div class="page-count">選択中：<span id="pageCount">0</span>ページ</div>
+    </div>
+
+    <!-- ページ別フォーム群 -->
+    <div class="page-forms" id="pageForms"></div>
+
+    <!-- プレミアム追加 -->
+    <div id="sec-premium-extra" class="hidden">
+      <div class="card">
+        <div class="card-title"><span>🤖</span>チャットボット設定</div>
+        <div class="field"><label>チャットボットで答えさせたいQ&A（3〜5件）</label>
+          <textarea id="pre-chatbot" rows="8" placeholder="例：&#10;Q：予約は必要ですか？&#10;A：はい、お電話またはLINEでご予約ください。&#10;&#10;Q：駐車場はありますか？&#10;A：店舗前に3台分あります。"></textarea>
+        </div>
+        <div class="field"><label>Googleアナリティクス用メールアドレス（GA設置に必要）</label>
+          <input type="email" id="pre-ga-email" placeholder="Googleアカウントのメールアドレス">
+        </div>
+        <div class="field"><label>動画素材のDriveリンク（あれば）</label>
+          <input type="url" id="pre-video-url" placeholder="https://drive.google.com/...">
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-submit" id="btnSubmit" onclick="submitForm()" disabled>プランを選択してください</button>
+
+  </div><!-- /formArea -->
+
+  <div class="success" id="successArea">
+    <div class="success-icon">✅</div>
+    <h2>送信完了しました！</h2>
+    <p>素材フォームのご提出ありがとうございます。<br>担当者が内容を確認し、3営業日以内にご連絡いたします。</p>
+  </div>
+
+</div>
+
+<script>
+var currentPlan = '';
+var selectedPages = [];
+var webhookUrl = localStorage.getItem('wb_webhook') || '';
+var planLimits = {standard: 5, premium: 10};
+
+// ページ定義（ページ名・アイコン・フォーム内容）
+var PAGE_DEFS = {
+  'TOP（メイン）': {
+    icon: '🏠',
+    fields: [
+      {id:'top-catch', label:'メインキャッチコピー', type:'input', placeholder:'例：素材を活かす、一番のこだわり。'},
+      {id:'top-sub', label:'サブコピー・説明文', type:'textarea', placeholder:'例：地元の旬の食材にこだわった、日替わりランチが人気のカフェです。', rows:4},
+      {id:'top-cta', label:'CTAボタンに入れる文言', type:'input', placeholder:'例：ご予約はこちら / メニューを見る'},
+      {id:'top-photo', label:'ヒーロー写真のイメージ・指定（ドライブのファイル名など）', type:'textarea', placeholder:'例：ドライブ内の「外観_昼.jpg」を大きく使ってほしい', rows:3},
+      {id:'top-other', label:'その他ご要望', type:'textarea', placeholder:'', rows:3},
+    ]
+  },
+  'メニュー・料金': {
+    icon: '📋',
+    fields: [
+      {id:'menu-list', label:'メニュー・料金一覧', type:'textarea', placeholder:'例：&#10;【ランチメニュー】&#10;・Aランチ（パスタ＋サラダ＋ドリンク）¥980&#10;・Bランチ（日替わり定食）¥1,080&#10;&#10;【ドリンク】&#10;・コーヒー ¥480&#10;・カフェラテ ¥580', rows:10},
+      {id:'menu-note', label:'料金に関する注意書き・備考', type:'input', placeholder:'例：税込表示・サービス料10%別途・ランチは11:00〜14:00限定'},
+      {id:'menu-other', label:'その他ご要望', type:'textarea', placeholder:'', rows:3},
+    ]
+  },
+  'スタッフ・オーナー紹介': {
+    icon: '👤',
+    fields: [
+      {id:'staff-list', label:'スタッフ・オーナーのプロフィール', type:'textarea', placeholder:'例：&#10;【オーナー】田中太郎&#10;資格：柔道整復師&#10;経歴：〇〇専門学校卒業後、△△接骨院に15年勤務。2020年に独立。&#10;ひとこと：患者さんの笑顔が一番のやりがいです。&#10;&#10;【スタッフ】鈴木花子&#10;資格：あん摩マッサージ指圧師&#10;ひとこと：〜〜〜', rows:10},
+      {id:'staff-photo', label:'写真のイメージ・ドライブのファイル名', type:'textarea', placeholder:'例：「staff_tanaka.jpg」がオーナー写真', rows:3},
+      {id:'staff-other', label:'その他ご要望', type:'textarea', placeholder:'', rows:3},
+    ]
+  },
+  'お客様の声・実績': {
+    icon: '⭐',
+    fields: [
+      {id:'voice-list', label:'お客様の声・口コミ', type:'textarea', placeholder:'例：&#10;「通い始めてから肩こりが劇的に改善されました。先生の説明も丁寧で安心です。」（30代女性）&#10;&#10;「初めてでしたが、丁寧に説明してくださり安心して受けられました。」（40代男性）', rows:10},
+      {id:'voice-result', label:'実績・数値データ（あれば）', type:'textarea', placeholder:'例：・開業10年・延べ1万人来院&#10;・リピート率85%&#10;・口コミ評価4.8（Googleマップ）', rows:4},
+      {id:'voice-other', label:'その他ご要望', type:'textarea', placeholder:'', rows:3},
+    ]
+  },
+  'アクセス・MAP': {
+    icon: '📍',
+    fields: [
+      {id:'access-address', label:'住所（正式）', type:'input', placeholder:'例：福岡県福岡市中央区天神1-1-1'},
+      {id:'access-station', label:'最寄り駅・バス停', type:'input', placeholder:'例：地下鉄天神駅 徒歩3分 / 西鉄天神バス停 徒歩1分'},
+      {id:'access-parking', label:'駐車場情報', type:'input', placeholder:'例：店舗前に3台分の無料駐車場あり / 近隣にコインパーキングあり'},
+      {id:'access-hours', label:'営業時間・定休日', type:'textarea', placeholder:'例：平日 10:00〜20:00&#10;土日祝 10:00〜18:00&#10;定休日：水曜日', rows:4},
+      {id:'access-other', label:'その他アクセス補足', type:'textarea', placeholder:'例：目印・外観の特徴など', rows:3},
+    ]
+  },
+  'こだわり・特徴': {
+    icon: '💎',
+    fields: [
+      {id:'feat-list', label:'こだわり・特徴（箇条書きでOK）', type:'textarea', placeholder:'例：&#10;【こだわり1】地元産の旬の食材を使用&#10;説明：毎朝市場で仕入れた新鮮な食材のみ使用しています。&#10;&#10;【こだわり2】完全個室で安心&#10;説明：お子様連れやご高齢の方にも配慮した完全個室をご用意。&#10;&#10;【こだわり3】予約優先制&#10;説明：お待たせしないよう予約優先制を採用しています。', rows:12},
+      {id:'feat-other', label:'その他ご要望', type:'textarea', placeholder:'', rows:3},
+    ]
+  },
+  '予約・お問い合わせ': {
+    icon: '📞',
+    fields: [
+      {id:'rsv-method', label:'予約方法', type:'textarea', placeholder:'例：&#10;・電話予約：090-0000-0000（10:00〜20:00）&#10;・LINE予約：@example（24時間受付）&#10;・Web予約：ホットペッパーから予約可', rows:5},
+      {id:'rsv-tel', label:'電話番号（掲載用）', type:'input', placeholder:'090-0000-0000'},
+      {id:'rsv-line', label:'LINE ID または URL', type:'input', placeholder:'@xxxxxx または https://lin.ee/...'},
+      {id:'rsv-reserve', label:'予約受付時間・注意事項', type:'textarea', placeholder:'例：前日18時までにご予約ください / 当日予約はお電話にて', rows:3},
+      {id:'rsv-other', label:'その他ご要望', type:'textarea', placeholder:'', rows:3},
+    ]
+  },
+  'ブログ・お知らせ': {
+    icon: '📝',
+    fields: [
+      {id:'blog-content', label:'掲載したい最新情報・お知らせ', type:'textarea', placeholder:'例：&#10;・2024年12月：年末年始の営業時間のお知らせ&#10;・2024年11月：新メニュー登場！&#10;・2024年10月：記念割引キャンペーン実施中', rows:6},
+      {id:'blog-freq', label:'今後の更新予定・頻度', type:'input', placeholder:'例：月1〜2回更新予定 / キャンペーン時のみ'},
+      {id:'blog-other', label:'その他ご要望', type:'textarea', placeholder:'', rows:3},
+    ]
+  },
+  'Q&A・よくある質問': {
+    icon: '❓',
+    fields: [
+      {id:'qa-list', label:'よくある質問と回答', type:'textarea', placeholder:'例：&#10;Q：初めてでも大丈夫ですか？&#10;A：はい、初めての方も多くご来店いただいております。丁寧にご説明しますのでお気軽にどうぞ。&#10;&#10;Q：予約は必要ですか？&#10;A：予約優先制です。当日の場合はお電話でご確認ください。&#10;&#10;Q：駐車場はありますか？&#10;A：店舗前に3台分ございます。', rows:12},
+      {id:'qa-other', label:'その他ご要望', type:'textarea', placeholder:'', rows:3},
+    ]
+  },
+  '会社概要': {
+    icon: '🏢',
+    fields: [
+      {id:'comp-info', label:'会社・店舗情報', type:'textarea', placeholder:'例：&#10;会社名：株式会社〇〇&#10;代表者：田中太郎&#10;設立：2015年4月&#10;所在地：福岡県福岡市中央区天神1-1-1&#10;事業内容：飲食業・カフェ経営&#10;従業員数：5名', rows:8},
+      {id:'comp-other', label:'その他ご要望', type:'textarea', placeholder:'', rows:3},
+    ]
+  },
+  '採用情報': {
+    icon: '💼',
+    fields: [
+      {id:'hire-info', label:'採用情報の詳細', type:'textarea', placeholder:'例：&#10;募集職種：ホールスタッフ&#10;雇用形態：アルバイト・パート&#10;給与：時給1,100円〜&#10;勤務時間：11:00〜22:00の間でシフト制&#10;勤務地：天神店&#10;応募方法：メール or 電話でご連絡ください', rows:10},
+      {id:'hire-contact', label:'応募先・連絡先', type:'input', placeholder:'例：採用担当：田中 / 090-0000-0000'},
+      {id:'hire-other', label:'その他ご要望', type:'textarea', placeholder:'', rows:3},
+    ]
+  },
+  '症状別ページ': {
+    icon: '🩺',
+    fields: [
+      {id:'symp-list', label:'掲載する症状・お悩みの一覧と説明', type:'textarea', placeholder:'例：&#10;【腰痛】&#10;長時間のデスクワークや重労働による腰の痛み。根本原因から改善します。&#10;&#10;【肩こり】&#10;ストレスや姿勢の乱れによる肩の張り・こり。施術と生活習慣のアドバイスで改善。&#10;&#10;【膝の痛み】&#10;変形性膝関節症・スポーツによる膝の痛みに対応。', rows:12},
+      {id:'symp-other', label:'その他ご要望', type:'textarea', placeholder:'', rows:3},
+    ]
+  },
+  'その他（担当者と相談）': {
+    icon: '💬',
+    fields: [
+      {id:'other-page-title', label:'ページのタイトル・名称（仮でOK）', type:'input', placeholder:'例：こだわりのコーヒーについて / 施術の流れ'},
+      {id:'other-page-content', label:'このページに掲載したい内容・イメージ', type:'textarea', placeholder:'例：・コーヒー豆の産地や焙煎へのこだわりを伝えたい&#10;・農園の写真や豆の種類を紹介したい&#10;・バリスタのこだわりコメントも入れたい', rows:8},
+      {id:'other-page-ref', label:'参考にしたいページ・URL（あれば）', type:'input', placeholder:'https://...'},
+      {id:'other-page-note', label:'その他ご要望・担当者への質問', type:'textarea', placeholder:'', rows:4},
+    ]
+  },
+};
+
+// スタンダード・プレミアムのページ選択肢
+var PAGES_STANDARD = [
+  'TOP（メイン）','メニュー・料金','アクセス・MAP','スタッフ・オーナー紹介',
+  'お客様の声・実績','予約・お問い合わせ','ブログ・お知らせ',
+  'こだわり・特徴','Q&A・よくある質問','会社概要','採用情報',
+  'その他（担当者と相談）'
+];
+var PAGES_PREMIUM = PAGES_STANDARD.concat(['症状別ページ']);
+
+// 管理者パスワードのSHA-256ハッシュ（パスワード: KOSK2024!）
+// 変更する場合は https://emn178.github.io/online-tools/sha256.html でハッシュを生成
+var ADMIN_HASH = '8d97d987c744d3d1744dfeaca5d2d90414a96102ba635fdc3b2a0d22e6281ea2';
+
+async function toggleAdmin(){
+  var p=document.getElementById('adminPanel');
+  if(p.style.display==='block'){
+    p.style.display='none';
+    return;
+  }
+  var pw = prompt('管理者パスワードを入力してください');
+  if(pw === null) return;
+  // SHA-256でハッシュ化して照合
+  var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
+  var hash = Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+  if(hash !== ADMIN_HASH){
+    alert('パスワードが正しくありません');
+    return;
+  }
+  p.style.display='block';
+  document.getElementById('cfg-webhook').value=webhookUrl;
+}
+function saveCfg(){
+  webhookUrl=document.getElementById('cfg-webhook').value.trim();
+  localStorage.setItem('wb_webhook',webhookUrl);
+  document.getElementById('adminPanel').style.display='none';
+  alert('設定を保存しました');
+}
+
+function toggleChip(el){ el.classList.toggle('on'); }
+function getChips(el){
+  var checks = el.querySelectorAll('input[type="checkbox"]:checked');
+  if(checks.length > 0){
+    return Array.from(checks).map(function(c){return c.value;}).join('、');
+  }
+  // fallback: onクラス
+  return Array.from(el.querySelectorAll('.chip.on')).map(function(c){return c.textContent.trim();}).join('、');
+}
+
+function selectPlan(plan){
+  currentPlan=plan;
+  selectedPages=[];
+  document.querySelectorAll('.plan-card').forEach(function(c){c.classList.remove('active');});
+  var planIdx={light:0,standard:1,premium:2}[plan];
+  var cards=document.querySelectorAll('.plan-card');
+  if(cards[planIdx]) cards[planIdx].classList.add('active');
+  // display操作はclassで統一（iOS対応）
+  ['sec-basic','sec-concept','sec-drive'].forEach(function(id){
+    document.getElementById(id).classList.remove('hidden');
+  });
+  if(plan==='light'){
+    document.getElementById('sec-light').classList.remove('hidden');
+    document.getElementById('sec-page-select').classList.add('hidden');
+  } else {
+    document.getElementById('sec-light').classList.add('hidden');
+    document.getElementById('sec-page-select').classList.remove('hidden');
+  }
+  if(plan==='premium'){
+    document.getElementById('sec-premium-extra').classList.remove('hidden');
+  } else {
+    document.getElementById('sec-premium-extra').classList.add('hidden');
+  }
+  document.getElementById('pageForms').innerHTML='';
+
+  var guides={light:'📸 推奨：外観1〜2枚・内観1〜2枚・商品1枚（計5枚程度）',standard:'📸 推奨：外観2〜3枚・内観3〜5枚・商品・スタッフ等（計15枚程度）',premium:'📸 推奨：外観3枚・内観5〜8枚・商品・スタッフ・動画等（計30枚程度）'};
+  document.getElementById('photo-guide').innerHTML=guides[plan];
+
+  if(plan!=='light') buildPageChips(plan);
+
+  var labels={light:'ライトプラン',standard:'スタンダードプラン',premium:'プレミアムプラン'};
+  var btn=document.getElementById('btnSubmit');
+  setTimeout(function(){
+    btn.disabled=false;
+    btn.textContent=labels[plan]+' で送信する →';
+    btn.style.display='block';
+  }, 50);
+
+  setTimeout(function(){try{document.getElementById('sec-basic').scrollIntoView({behavior:'auto',block:'start'});}catch(e){window.scrollTo(0,document.getElementById('sec-basic').offsetTop-20);}},150);
+}
+
+function buildPageChips(plan){
+  var pages=plan==='premium'?PAGES_PREMIUM:PAGES_STANDARD;
+  var limit=planLimits[plan];
+  document.getElementById('page-limit-text').textContent='最大'+limit+'ページまで選択できます。TOPページは必須です。';
+  var el=document.getElementById('pageChips');
+  el.innerHTML='';
+  pages.forEach(function(p){
+    var div=document.createElement('div');
+    div.className='page-chip'+(p==='TOP（メイン）'?' on':'');
+    div.innerHTML='<span class="check">✓</span>'+p;
+    // iOS対応：touchendとclickの両方に対応
+    var tapped=false;
+    div.addEventListener('touchstart',function(){tapped=true;},{passive:true});
+    div.addEventListener('touchend',function(e){
+      e.preventDefault();
+      togglePage(div,p,limit);
+    },{passive:false});
+    div.addEventListener('click',function(){
+      if(!tapped) togglePage(div,p,limit);
+      tapped=false;
+    });
+    el.appendChild(div);
+  });
+  if(currentPlan!=='light'){
+    selectedPages=['TOP（メイン）'];
+    document.getElementById('pageCount').textContent=1;
+    buildPageForms();
+  }
+}
+
+function togglePage(el,page,limit){
+  if(page==='TOP（メイン）') return; // TOPは必須
+  var idx=selectedPages.indexOf(page);
+  if(idx>-1){
+    selectedPages.splice(idx,1);
+    el.classList.remove('on');
+  } else {
+    if(selectedPages.length>=limit){alert('最大'+limit+'ページまで選択できます。');return;}
+    selectedPages.push(page);
+    el.classList.add('on');
+  }
+  document.getElementById('pageCount').textContent=selectedPages.length;
+  buildPageForms();
+}
+
+function buildPageForms(){
+  var container=document.getElementById('pageForms');
+  var saved={};
+  container.querySelectorAll('[data-field]').forEach(function(el){saved[el.dataset.field]=el.value;});
+  container.innerHTML='';
+
+  var ordered=['TOP（メイン）'].concat(selectedPages.filter(function(p){return p!=='TOP（メイン）';}));
+
+  ordered.forEach(function(page,i){
+    var def=PAGE_DEFS[page];
+    if(!def) return;
+    var card=document.createElement('div');
+    card.className='page-form-card';
+    card.style.cssText='display:block;background:var(--surface2);border:1px solid var(--accent);border-radius:14px;padding:18px;margin-bottom:14px;';
+    var html='<div class="page-form-title"><span>'+def.icon+'</span>'+page+'</div>';
+    def.fields.forEach(function(f){
+      html+='<div class="field"><label>'+f.label+'</label>';
+      var val=saved[f.id]||'';
+      if(f.type==='textarea'){
+        html+='<textarea id="'+f.id+'" data-field="'+f.id+'" rows="'+(f.rows||4)+'" placeholder="'+f.placeholder+'">'+val+'</textarea>';
+      } else {
+        html+='<input type="text" id="'+f.id+'" data-field="'+f.id+'" placeholder="'+f.placeholder+'" value="'+val+'">';
+      }
+      html+='</div>';
+    });
+    card.innerHTML=html;
+    container.appendChild(card);
+  });
+}
+
+function getPageFormData(){
+  var result={};
+  selectedPages.forEach(function(page){
+    var def=PAGE_DEFS[page];
+    if(!def) return;
+    var pageData={};
+    def.fields.forEach(function(f){
+      var el=document.getElementById(f.id);
+      if(el) pageData[f.label]=el.value.trim();
+    });
+    result[page]=pageData;
+  });
+  return result;
+}
+
+function validate(){
+  var errs=[];
+  if(!currentPlan) errs.push('プランを選択してください');
+  if(!document.getElementById('shopName').value.trim()) errs.push('店舗名を入力してください');
+  if(!document.getElementById('industry').value) errs.push('業種を選択してください');
+  if(!document.getElementById('contactName').value.trim()) errs.push('担当者名を入力してください');
+  var em=document.getElementById('contactEmail').value.trim();
+  if(!em||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) errs.push('正しいメールアドレスを入力してください');
+  if(!document.getElementById('formEmail').value.trim()) errs.push('問い合わせ転送先メールを入力してください');
+  return errs;
+}
+
+function submitForm(){
+  var errs=validate();
+  if(errs.length){alert('⚠ 入力内容を確認してください\n\n'+errs.join('\n'));return;}
+  var planNames={light:'ライトプラン (¥8,000/月)',standard:'スタンダードプラン (¥15,000/月)',premium:'プレミアムプラン (¥30,000/月)'};
+  var data={
+    plan:planNames[currentPlan],
+    shopName:document.getElementById('shopName').value.trim(),
+    industry:document.getElementById('industry').value,
+    contactName:document.getElementById('contactName').value.trim(),
+    contactEmail:document.getElementById('contactEmail').value.trim(),
+    contactTel:document.getElementById('contactTel').value.trim(),
+    publicTel:document.getElementById('publicTel').value.trim(),
+    address:document.getElementById('address').value.trim(),
+    hours:document.getElementById('hours').value.trim(),
+    sns:document.getElementById('sns').value.trim(),
+    formEmail:document.getElementById('formEmail').value.trim(),
+    catchcopy:document.getElementById('catchcopy').value.trim(),
+    mood:getChips(document.getElementById('chips-mood')),
+    color:getChips(document.getElementById('chips-color')),
+    refUrls:document.getElementById('refUrls').value.trim(),
+    strength:document.getElementById('strength').value.trim(),
+    driveUrl:document.getElementById('driveUrl').value.trim(),
+    hasLogo:document.getElementById('hasLogo').value,
+    submittedAt:new Date().toLocaleString('ja-JP'),
+  };
+  if(currentPlan==='light'){
+    data.lightMain=document.getElementById('light-main').value.trim();
+    data.lightNote=document.getElementById('light-note').value.trim();
+  } else {
+    data.selectedPages=selectedPages;
+    data.pageData=getPageFormData();
+  }
+  if(currentPlan==='premium'){
+    data.preChatbot=document.getElementById('pre-chatbot').value.trim();
+    data.preGaEmail=document.getElementById('pre-ga-email').value.trim();
+    data.preVideoUrl=document.getElementById('pre-video-url').value.trim();
+  }
+  document.getElementById('btnSubmit').disabled=true;
+  document.getElementById('btnSubmit').textContent='送信中...';
+  if(webhookUrl){
+    fetch(webhookUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),mode:'no-cors'})
+    .then(function(){showSuccess();}).catch(function(){showSuccess();});
+  } else {
+    console.log('送信データ:',data); showSuccess();
+  }
+}
+
+function showSuccess(){
+  document.getElementById('formArea').style.display='none';
+  document.getElementById('successArea').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// 全タッチイベントを一括管理（iOS対応）
+document.addEventListener('DOMContentLoaded', function(){
+
+  // タッチ対応ヘルパー（ダブル発火防止）
+  function addTapHandler(el, fn){
+    var tapped = false;
+    el.addEventListener('touchstart', function(){ tapped = true; }, {passive:true});
+    el.addEventListener('touchend', function(e){
+      e.preventDefault();
+      fn(el);
+    }, {passive:false});
+    el.addEventListener('click', function(){
+      if(!tapped) fn(el);
+      tapped = false;
+    });
+  }
+
+  // プランカード
+  document.querySelectorAll('[data-plan]').forEach(function(el){
+    addTapHandler(el, function(){ selectPlan(el.dataset.plan); });
+  });
+
+  // 雰囲気・カラーチップはcheckboxで管理（イベント不要）
+
+});
+</script>
+</body>
+</html>
